@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_pdf_text/src/client_provider.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pdf_text/client_provider.dart';
 
 const MethodChannel _channel = MethodChannel('pdf_text');
 const String _tempDirName = ".flutter_pdf_text";

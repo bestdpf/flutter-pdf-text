@@ -1,4 +1,4 @@
-import 'package:pdf_text/pdf_text.dart';
+import 'package:flutter_pdf_text/flutter_pdf_text.dart';
 
 class TestDocInfo {
   final String? title;

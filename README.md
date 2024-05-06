@@ -26,7 +26,7 @@ dependencies:
 Import the package with:
 
 ```dart
-import 'package:pdf_text/pdf_text.dart';
+import 'package:flutter_pdf_text/pdf_text.dart';
 ```
 
 **Create a PDF document instance using a File object:**
