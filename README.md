@@ -1,10 +1,14 @@
 # PDF Text Plugin
 
-[![Pub Version](https://img.shields.io/pub/v/pdf_text)](https://pub.dev/packages/pdf_text)
-[![Flutter CI](https://github.com/AlessioLuciani/flutter-pdf-text/workflows/Flutter%20CI/badge.svg?branch=master)](https://github.com/AlessioLuciani/flutter-pdf-text/actions/workflows/flutter.yml)
-[![GitHub forks](https://img.shields.io/github/forks/AlessioLuciani/flutter-pdf-text)](https://github.com/AlessioLuciani/flutter-pdf-text/network)
-[![GitHub stars](https://img.shields.io/github/stars/AlessioLuciani/flutter-pdf-text)](https://github.com/AlessioLuciani/flutter-pdf-text/stargazers)
-[![GitHub license](https://img.shields.io/github/license/AlessioLuciani/flutter-pdf-text)](https://github.com/AlessioLuciani/flutter-pdf-text/blob/master/LICENSE)
+> This is a fork of https://pub.dev/packages/pdf_text
+>
+> With the following changes:
+> 
+> * Improved null safety
+> * Upgraded pdfbox-android to v2
+> * Reorganized project structure
+> * Upgraded build files, gradle & kotlin
+> * Upgraded dependecies
 
 This plugin for [Flutter](https://flutter.dev) allows you to read the text content of PDF documents and convert it into strings. It works on iOS and Android. On iOS it uses Apple's [PDFKit](https://developer.apple.com/documentation/pdfkit). On Android it uses Apache's [PdfBox](https://github.com/TomRoush/PdfBox-Android) Android porting.
 

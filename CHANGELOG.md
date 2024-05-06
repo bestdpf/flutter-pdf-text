@@ -1,3 +1,11 @@
+## 0.6.0
+
+* Improved null safety
+* Upgraded pdfbox-android to v2
+* Reorganized project structure
+* Upgraded build files, gradle & kotlin
+* Upgraded dependecies
+
 ## 0.5.0
 
 * Dart's sound null safety is now supported.
