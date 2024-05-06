@@ -9,13 +9,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  http: ^1.2.1
   path: ^1.8.0
   path_provider: ^2.0.1
-  http: ^1.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  lint: ^2.3.0
 
 flutter:
   plugin:

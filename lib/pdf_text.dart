@@ -6,8 +6,8 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf_text/client_provider.dart';
 
-const MethodChannel _CHANNEL = const MethodChannel('pdf_text');
-const String _TEMP_DIR_NAME = ".flutter_pdf_text";
+const MethodChannel _channel = MethodChannel('pdf_text');
+const String _tempDirName = ".flutter_pdf_text";
 
 /// Class representing a PDF document.
 /// In order to create a new [PDFDoc] instance, one of these static methods has
@@ -23,18 +23,25 @@ class PDFDoc {
   /// Creates a [PDFDoc] object with a [File] instance.
   /// Optionally, takes a [password] for encrypted PDF documents.
   static Future<PDFDoc> fromFile(File file, {String password = ""}) async {
-    var doc = PDFDoc._internal();
+    final doc = PDFDoc._internal();
     doc._password = password;
     doc._file = file;
-    late Map data;
+    late Map? data;
     try {
-      data = await _CHANNEL
+      data = await _channel
           .invokeMethod('initDoc', {"path": file.path, "password": password});
+
+      if (data != null) {
+        doc._pages = List.generate(
+          data["length"] as int,
+          (i) => PDFPage._fromDoc(doc, i),
+        );
+        doc._info = PDFDocInfo._fromMap(data["info"] as Map);
+      }
     } on Exception catch (e) {
       return Future.error(e);
     }
-    doc._pages = List.generate(data["length"], (i) => PDFPage._fromDoc(doc, i));
-    doc._info = PDFDocInfo._fromMap(data["info"]);
+
     return doc;
   }
 
@@ -51,15 +58,19 @@ class PDFDoc {
   static Future<PDFDoc> fromURL(String url, {String password = ""}) async {
     File file;
     try {
-      String tempDirPath = (await getTemporaryDirectory()).path;
+      final String tempDirPath = (await getTemporaryDirectory()).path;
 
-      String filePath = join(tempDirPath, _TEMP_DIR_NAME,
-          url.split("/").last.split(".").first + ".pdf");
+      final String filePath = join(
+        tempDirPath,
+        _tempDirName,
+        "${url.split("/").last.split(".").first}.pdf",
+      );
 
       file = File(filePath);
       file.createSync(recursive: true);
       file.writeAsBytesSync(
-          (await ClientProvider().client.get(Uri.parse(url))).bodyBytes);
+        (await ClientProvider().client.get(Uri.parse(url))).bodyBytes,
+      );
     } on Exception catch (e) {
       return Future.error(e);
     }
@@ -86,23 +97,24 @@ class PDFDoc {
   Future<String> get text async {
     // Collecting missing pages
 
-    List<int> missingPagesNumbers = [];
-    _pages.forEach((page) {
+    final List<int> missingPagesNumbers = [];
+    for (final page in _pages) {
       if (page._text == null) {
         missingPagesNumbers.add(page.number);
       }
-    });
+    }
 
     late List<String> missingPagesTexts;
     // Reading missing pages, if any exists
     if (missingPagesNumbers.isNotEmpty) {
       try {
-        missingPagesTexts =
-            List<String>.from(await (_CHANNEL.invokeMethod('getDocText', {
-          "path": _file.path,
-          "missingPagesNumbers": missingPagesNumbers,
-          "password": _password
-        })));
+        missingPagesTexts = List<String>.from(
+          await _channel.invokeMethod('getDocText', {
+            "path": _file.path,
+            "missingPagesNumbers": missingPagesNumbers,
+            "password": _password,
+          }) as Iterable,
+        );
       } on Exception catch (e) {
         return Future.error(e);
       }
@@ -129,8 +141,8 @@ class PDFDoc {
   /// from outside the local file system (e.g. using [fromURL]).
   static Future deleteAllExternalFiles() async {
     try {
-      String tempDirPath = (await getTemporaryDirectory()).path;
-      Directory dir = Directory(join(tempDirPath, _TEMP_DIR_NAME));
+      final String tempDirPath = (await getTemporaryDirectory()).path;
+      final Directory dir = Directory(join(tempDirPath, _tempDirName));
 
       if (dir.existsSync()) {
         dir.deleteSync(recursive: true);
@@ -161,10 +173,10 @@ class PDFPage {
     // Loading the text
     if (_text == null) {
       try {
-        _text = await _CHANNEL.invokeMethod('getDocPageText', {
+        _text = await _channel.invokeMethod('getDocPageText', {
           "path": _parentDoc._file.path,
           "number": number,
-          "password": _parentDoc._password
+          "password": _parentDoc._password,
         });
       } on Exception catch (e) {
         return Future.error(e);
@@ -192,30 +204,32 @@ class PDFDocInfo {
 
   PDFDocInfo._fromMap(Map data)
       : this._internal(
-            data["author"],
-            data["creationDate"] != null
-                ? DateTime.tryParse(data["creationDate"])
-                : null,
-            data["modificationDate"] != null
-                ? DateTime.tryParse(data["modificationDate"])
-                : null,
-            data["creator"],
-            data["producer"],
-            data["keywords"] != null
-                ? List<String>.from(data["keywords"])
-                : null,
-            data["title"],
-            data["subject"]);
+          data["author"] as String?,
+          data["creationDate"] != null
+              ? DateTime.tryParse(data["creationDate"] as String)
+              : null,
+          data["modificationDate"] != null
+              ? DateTime.tryParse(data["modificationDate"] as String)
+              : null,
+          data["creator"] as String?,
+          data["producer"] as String?,
+          data["keywords"] != null
+              ? List<String>.from(data["keywords"] as Iterable)
+              : null,
+          data["title"] as String?,
+          data["subject"] as String?,
+        );
 
   PDFDocInfo._internal(
-      this._author,
-      this._creationDate,
-      this._modificationDate,
-      this._creator,
-      this._producer,
-      this._keywords,
-      this._title,
-      this._subject);
+    this._author,
+    this._creationDate,
+    this._modificationDate,
+    this._creator,
+    this._producer,
+    this._keywords,
+    this._title,
+    this._subject,
+  );
 
   /// Gets the author of the document. This contains the original string of the
   /// authors contained in the document. Therefore there might be multiple
@@ -231,10 +245,10 @@ class PDFDocInfo {
     var authorString = author!.replaceAll(";", ",");
     authorString = authorString.replaceAll("&", ",");
     authorString = authorString.replaceAll("and", ",");
-    List<String> splitted = authorString.split(",");
-    List<String> ret = [];
+    final List<String> splitted = authorString.split(",");
+    final List<String> ret = [];
 
-    for (var token in splitted) {
+    for (final token in splitted) {
       var start = 0;
       var end = token.length - 1;
       while (start < token.length && token[start] == ' ') {
