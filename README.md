@@ -22,7 +22,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  pdf_text: ^0.5.0
+  flutter_pdf_text: ^0.6.0
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ dependencies:
 Import the package with:
 
 ```dart
-import 'package:flutter_pdf_text/pdf_text.dart';
+import 'package:flutter_pdf_text/flutter_pdf_text.dart';
 ```
 
 **Create a PDF document instance using a File object:**
