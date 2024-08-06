@@ -1,6 +1,10 @@
 #import "PdfTextPlugin.h"
 #if __has_include(<pdf_text/pdf_text-Swift.h>)
 #import <pdf_text/pdf_text-Swift.h>
+#elif __has_include(<flutter_pdf_text/flutter_pdf_text-Swift.h>)
+#import <flutter_pdf_text/flutter_pdf_text-Swift.h>
+#elif __has_include("flutter_pdf_text-Swift.h")
+#import "flutter_pdf_text-Swift.h"
 #else
 // Support project import fallback if the generated compatibility header
 // is not copied when this plugin is created as a library.
